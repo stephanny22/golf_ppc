@@ -1,33 +1,34 @@
 package com.example.golf_ppc.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
-
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-
 import com.example.golf_ppc.data.local.AppDatabase
 import com.example.golf_ppc.data.local.ReservacionData
 import com.example.golf_ppc.data.local.ReservationStatus
 import com.example.golf_ppc.data.repositorio.ReservacionRepositorio
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservaScreen(navController: NavController) {
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
-    val dao = db.reservacionDAO()
     val repo = ReservacionRepositorio(db)
     val scope = rememberCoroutineScope()
 
-
+    // Estados de los campos
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var cancha by remember { mutableStateOf("") }
@@ -36,16 +37,43 @@ fun ReservaScreen(navController: NavController) {
     var duracion by remember { mutableStateOf("1") }
     var notas by remember { mutableStateOf("") }
 
+    // --- Lógica del Calendario ---
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val selectedDate = datePickerState.selectedDateMillis
+                    if (selectedDate != null) {
+                        // Formateamos la fecha a yyyy-MM-dd
+                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        fecha = formatter.format(Date(selectedDate))
+                    }
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
+            .verticalScroll(rememberScrollState()) // Añadido para que quepa en pantallas pequeñas
     ) {
-
         Text("Registrar Reserva", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campos de texto normales...
         OutlinedTextField(
             value = nombre,
             onValueChange = { nombre = it },
@@ -67,11 +95,21 @@ fun ReservaScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        // --- CAMPO DE FECHA CON CALENDARIO ---
         OutlinedTextField(
             value = fecha,
             onValueChange = { fecha = it },
-            label = { Text("Fecha (yyyy-MM-dd)") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Fecha de Reserva") },
+            placeholder = { Text("Selecciona una fecha") },
+            readOnly = true, // Evita que el teclado se abra
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showDatePicker = true }, // Abre el calendario al tocar el campo
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar Fecha")
+                }
+            }
         )
 
         OutlinedTextField(
@@ -97,20 +135,12 @@ fun ReservaScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Botón Guardar
         Button(
             onClick = {
-
-                if (
-                    nombre.isNotBlank() &&
-                    telefono.isNotBlank() &&
-                    cancha.isNotBlank() &&
-                    fecha.isNotBlank() &&
-                    hora.isNotBlank()
-                ) {
-
+                if (nombre.isNotBlank() && fecha.isNotBlank() && cancha.isNotBlank()) {
                     scope.launch {
-
-                        val error = repo.addReservation(
+                        repo.addReservation(
                             ReservacionData(
                                 clientName = nombre,
                                 clientPhone = telefono,
@@ -122,17 +152,9 @@ fun ReservaScreen(navController: NavController) {
                                 notes = notas
                             )
                         )
-
-                        if (error == null) {
-                            // ÉXITO
-                            navController.popBackStack()
-                        } else {
-                            // ERROR (conflicto de cancha)
-                            println(error)
-                        }
+                        navController.popBackStack()
                     }
                 }
-
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -141,7 +163,7 @@ fun ReservaScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
+        OutlinedButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier.fillMaxWidth()
         ) {

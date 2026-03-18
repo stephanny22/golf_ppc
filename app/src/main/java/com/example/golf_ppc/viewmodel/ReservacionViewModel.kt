@@ -86,13 +86,19 @@ class ReservacionViewModel (application: Application): AndroidViewModel(applicat
 
     private fun refreshDashboard() {
         viewModelScope.launch {
+            val hoy = getTodayDate()
+            val activas = repositorio.getActiveCount()
+            val canceladas = repositorio.getCancelledCount()
+            val completadas = repositorio.getCompletedCount()
+
+            // Obtenemos el total de registros de HOY independientemente del estado
+            val totalHoy = repositorio.getOccupiedCourtsToday(hoy)
+
             _dashboard.value = Informacion(
-                activeField = repositorio.getActiveCount(),
-                cancelledField = repositorio.getCancelledCount(),
-                completedField = repositorio.getCompletedCount(),
-                occupiedFieldsToday = repositorio.getOccupiedCourtsToday(
-                    getTodayDate()
-                )
+                activeField = activas,
+                cancelledField = canceladas,
+                completedField = completadas,
+                occupiedFieldsToday = totalHoy // Este representará el total de hoy
             )
         }
     }

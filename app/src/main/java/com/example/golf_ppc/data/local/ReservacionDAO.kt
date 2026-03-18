@@ -36,14 +36,11 @@ interface ReservacionDAO {
     ): Int
 
     // Resumen: total reservas por estado ordenadas por estado
-    @Query("SELECT COUNT(*) FROM reservations WHERE status = :status ORDER BY status = 'ACTIVA'")
+    @Query("SELECT COUNT(*) FROM reservations WHERE status = :status")
     suspend fun countByStatus(status: ReservationStatus): Int
 
-    // Canchas ocupadas hoy
-    @Query("""
-        SELECT COUNT(DISTINCT fieldNumber) FROM reservations 
-        WHERE date = :today AND status = 'ACTIVA'
-    """)
+    // Canchas ocupadas hoy 
+    @Query("SELECT COUNT(*) FROM reservations WHERE date = :today")
     suspend fun occupiedCourtsToday(today: String): Int
 
     @Insert(onConflict = OnConflictStrategy.ABORT)

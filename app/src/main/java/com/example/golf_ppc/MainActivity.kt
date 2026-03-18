@@ -19,8 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.example.golf_ppc.screens.AllReservasScreen
+import com.example.golf_ppc.screens.EditarReservaScreen
 import com.example.golf_ppc.screens.WelcomeScreen
 import com.example.golf_ppc.screens.ReservaScreen
 import com.example.golf_ppc.ui.theme.Golf_ppcTheme
@@ -43,6 +46,13 @@ class MainActivity : ComponentActivity() {
                     composable("home") { HomeScreen(navController, viewModel) }
                     composable("reserva") { ReservaScreen(navController) }
                     composable("all_reservas") { AllReservasScreen(navController) }
+                    composable(
+                        route = "editar_reserva/{id}",
+                        arguments = listOf(navArgument("id") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val id = backStackEntry.arguments?.getInt("id") ?: 0
+                        EditarReservaScreen(navController, id)
+                    }
                 }
             }
         }
@@ -79,9 +89,9 @@ fun ScrollContent(
     info: com.example.golf_ppc.viewmodel.Informacion,
     reservas: List<com.example.golf_ppc.data.local.ReservacionData>
 ) {
-    // Mapeamos tu información del ViewModel a la lista del Grid
+    // Ajustamos la lista para que coincida con lo que necesitas:
     val itemsDashboard = listOf(
-        "Hoy\n${info.occupiedFieldsToday}" to "Canchas",
+        "Hoy\n${info.occupiedFieldsToday}" to "Total Reservas", // Representa el total del día
         "Activas\n${info.activeField}" to "Reservas",
         "Finalizadas\n${info.completedField}" to "Historial",
         "Canceladas\n${info.cancelledField}" to "Alertas"
@@ -98,7 +108,10 @@ fun ScrollContent(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 itemsDashboard.chunked(2).forEach { rowItems ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         rowItems.forEach { (titulo, subtitulo) ->
                             Box(
                                 modifier = Modifier
@@ -109,8 +122,18 @@ fun ScrollContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = titulo, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                    Text(text = subtitulo, style = MaterialTheme.typography.labelMedium)
+                                    Text(
+                                        text = titulo,
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = subtitulo,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }
