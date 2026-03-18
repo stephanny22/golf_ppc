@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
+import com.example.golf_ppc.screens.AllReservasScreen
 import com.example.golf_ppc.screens.WelcomeScreen
 import com.example.golf_ppc.screens.ReservaScreen
 
@@ -58,10 +59,14 @@ class MainActivity : ComponentActivity() {
                     composable("reserva") {
                         ReservaScreen(navController)
                     }
+                    composable("all_reservas") {
+                        AllReservasScreen(navController)
+                    }
                 }
             }
         }
     }
+
 }
 @Preview(showBackground = true)
 
@@ -162,7 +167,7 @@ fun ScrollContent(navController: NavController,padding: PaddingValues) {
         // BOTÓN VER MÁS
         item {
             Button(
-                onClick = {},
+                onClick = {navController.navigate("all_reservas")},
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Ver más")
@@ -180,3 +185,4 @@ fun ScrollContent(navController: NavController,padding: PaddingValues) {
         }
     }
 }
+
