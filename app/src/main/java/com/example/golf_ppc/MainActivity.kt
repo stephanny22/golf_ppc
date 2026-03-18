@@ -25,16 +25,40 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.*
+import com.example.golf_ppc.screens.WelcomeScreen
+import com.example.golf_ppc.screens.ReservaScreen
+
 
 import com.example.golf_ppc.ui.theme.Golf_ppcTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
             Golf_ppcTheme {
-                SmallTopAppBarExample()
+
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "welcome"
+                ) {
+
+                    composable("welcome") {
+                        WelcomeScreen(navController)
+                    }
+
+                    composable("home") {
+                        HomeScreen(navController)
+                    }
+
+                    composable("reserva") {
+                        ReservaScreen(navController)
+                    }
+                }
             }
         }
     }
@@ -43,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample() {
+fun HomeScreen(navController: NavController) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -57,11 +81,11 @@ fun SmallTopAppBarExample() {
             )
         },
     ) { innerPadding ->
-        ScrollContent(innerPadding)
+        ScrollContent(navController,innerPadding)
     }
 }
 @Composable
-fun ScrollContent(x0: PaddingValues) {
+fun ScrollContent(navController: NavController,padding: PaddingValues) {
 
     val itemsList = listOf(
         "Reservas Hoy \n 12",
@@ -72,7 +96,7 @@ fun ScrollContent(x0: PaddingValues) {
 
     LazyColumn(
         modifier = Modifier
-            .padding(x0)
+            .padding(padding)
             .fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -138,7 +162,7 @@ fun ScrollContent(x0: PaddingValues) {
         // BOTÓN VER MÁS
         item {
             Button(
-                onClick = { },
+                onClick = {},
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Ver más")
@@ -148,7 +172,7 @@ fun ScrollContent(x0: PaddingValues) {
         // BOTÓN FINAL
         item {
             Button(
-                onClick = { },
+                onClick = { navController.navigate("reserva")},
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Reservar")
