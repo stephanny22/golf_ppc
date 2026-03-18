@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Golf"
+rootProject.name = "golf_ppc"
 include(":app")
  
