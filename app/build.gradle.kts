@@ -1,15 +1,21 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
+}
+kotlin {
+    jvmToolchain(21)
 }
 
 android {
     namespace = "com.example.golf_ppc"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 36
     }
 
     defaultConfig {
@@ -32,8 +38,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
